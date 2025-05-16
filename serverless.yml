@@ -24,12 +24,61 @@ custom:
     tableName: ${self:service}-${self:provider.stage}
 
 functions:
+  # User entity functions
   createUser:
     handler: src/user/handlers/create-user.createUser
     events:
       - httpApi:
           method: POST
           path: /api/v1/users
+
+  # Group entity functions
+  createGroup:
+    handler: src/group/handlers/create-group.createGroup
+    events:
+      - httpApi:
+          method: POST
+          path: /api/v1/groups
+
+  # UserGroupMembership entity functions
+  createUserGroupMembership:
+    handler: src/user-group-membership/handlers/create-user-group-membership.createUserGroupMembership
+    events:
+      - httpApi:
+          method: POST
+          path: /api/v1/user-group-memberships
+
+  # Expense entity functions
+  createExpense:
+    handler: src/expense/handlers/create-expense.createExpense
+    events:
+      - httpApi:
+          method: POST
+          path: /api/v1/expenses
+
+  # ExpenseSplit entity functions
+  createExpenseSplit:
+    handler: src/expense-split/handlers/create-expense-split.createExpenseSplit
+    events:
+      - httpApi:
+          method: POST
+          path: /api/v1/expense-splits
+
+  # Payment entity functions
+  createPayment:
+    handler: src/payment/handlers/create-payment.createPayment
+    events:
+      - httpApi:
+          method: POST
+          path: /api/v1/payments
+
+  # Balance entity functions
+  createBalance:
+    handler: src/user/handlers/create-balance.createBalance
+    events:
+      - httpApi:
+          method: POST
+          path: /api/v1/balances
 
 resources:
   Resources:
