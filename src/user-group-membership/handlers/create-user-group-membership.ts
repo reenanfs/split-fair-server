@@ -3,11 +3,12 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
 
 import { ResponseManager } from '@utils/response-manager';
-import { GroupService } from '../group-service';
+import { UserGroupMembershipService } from '../user-group-membership-service';
 
-const createGroupSchema = z.object({
-  name: z.string().min(1),
+const createUserGroupMembershipSchema = z.object({
   userId: z.string().min(1),
+  groupId: z.string().min(1),
+  role: z.string().min(1),
 });
 
 export const createGroup = async (
@@ -16,7 +17,7 @@ export const createGroup = async (
   try {
     const body = JSON.parse(event.body || '{}');
 
-    const valdiation = createGroupSchema.safeParse(body);
+    const valdiation = createUserGroupMembershipSchema.safeParse(body);
 
     if (!valdiation.success) {
       return ResponseManager.sendBadRequest(
@@ -25,9 +26,13 @@ export const createGroup = async (
       );
     }
 
-    const { name, userId } = body;
+    const { userId, groupId, role } = body;
 
-    await GroupService.createGroup(name, userId);
+    await UserGroupMembershipService.createUserGroupMembership(
+      userId,
+      groupId,
+      role,
+    );
 
     return ResponseManager.sendSuccess('Group created successfully');
   } catch (error) {
