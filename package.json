@@ -1,0 +1,20 @@
+{
+  "name": "splitmaster",
+  "version": "1.0.0",
+  "description": "SplitMaster server",
+  "scripts": {
+    "deploy": "serverless deploy",
+    "dev": "serverless dev",
+    "offline": "serverless offline"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.149",
+    "@types/node": "^22.15.2"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.797.0",
+    "@aws-sdk/util-dynamodb": "^3.797.0",
+    "uuid": "^11.1.0",
+    "zod": "^3.24.3"
+  }
+}
