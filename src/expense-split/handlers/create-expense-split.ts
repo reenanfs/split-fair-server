@@ -3,17 +3,15 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
 
 import { ResponseManager } from '@utils/response-manager';
-import { ExpenseService } from '../expense-service';
+import { ExpenseSplitService } from '../expense-split-service';
 
 const createExpenseSchema = z.object({
   groupId: z.string().min(1),
   expenseId: z.string().min(1),
   userId: z.string().min(1),
-  description: z.string().min(1),
-  totalAmount: z.number().nonnegative(),
-  currency: z.string().min(1),
-  paidByUserId: z.string().min(1),
-  category: z.string().optional(),
+  amountOwed: z.number().nonnegative(),
+  splitType: z.string().min(1),
+  percentage: z.number().min(0).max(1),
 });
 
 export const createGroup = async (
@@ -31,26 +29,16 @@ export const createGroup = async (
       );
     }
 
-    const {
-      groupId,
-      expenseId,
-      userId,
-      description,
-      totalAmount,
-      currency,
-      paidByUserId,
-      category,
-    } = body;
+    const { groupId, expenseId, userId, amountOwed, splitType, percentage } =
+      body;
 
-    await ExpenseService.createExpense(
+    await ExpenseSplitService.createExpenseSplit(
       groupId,
       expenseId,
       userId,
-      description,
-      totalAmount,
-      currency,
-      paidByUserId,
-      category,
+      amountOwed,
+      splitType,
+      percentage,
     );
 
     return ResponseManager.sendSuccess('Expense created successfully');
