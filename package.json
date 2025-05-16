@@ -1,7 +1,7 @@
 {
-  "name": "splitmaster",
+  "name": "splitfair",
   "version": "1.0.0",
-  "description": "SplitMaster server",
+  "description": "SplitFair server",
   "scripts": {
     "deploy": "serverless deploy",
     "dev": "serverless dev",

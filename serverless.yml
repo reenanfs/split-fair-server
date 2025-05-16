@@ -1,6 +1,6 @@
 # "org" ensures this Service is used with the correct Serverless Framework Access Key.
 org: reenanfs
-service: splitmaster
+service: splitfair
 
 provider:
   name: aws
