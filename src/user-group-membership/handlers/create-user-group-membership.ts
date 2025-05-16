@@ -11,7 +11,7 @@ const createUserGroupMembershipSchema = z.object({
   role: z.string().min(1),
 });
 
-export const createGroup = async (
+export const createUserGroupMembership = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   try {

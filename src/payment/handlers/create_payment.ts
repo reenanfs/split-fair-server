@@ -3,24 +3,24 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
 
 import { ResponseManager } from '@utils/response-manager';
-import { ExpenseSplitService } from '../expense-split-service';
+import { PaymentService } from '../payment-service';
 
-const createExpenseSplitSchema = z.object({
+const createPaymentSchema = z.object({
+  paymentId: z.string().min(1),
   groupId: z.string().min(1),
-  expenseId: z.string().min(1),
-  userId: z.string().min(1),
-  amountOwed: z.number().nonnegative(),
-  splitType: z.string().min(1),
-  percentage: z.number().min(0).max(1),
+  fromUserId: z.string().min(1),
+  toUserId: z.string().min(1),
+  amount: z.number().nonnegative(),
+  currency: z.string().min(1),
 });
 
-export const createExpenseSplit = async (
+export const createPayment = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   try {
     const body = JSON.parse(event.body || '{}');
 
-    const valdiation = createExpenseSplitSchema.safeParse(body);
+    const valdiation = createPaymentSchema.safeParse(body);
 
     if (!valdiation.success) {
       return ResponseManager.sendBadRequest(
@@ -29,16 +29,15 @@ export const createExpenseSplit = async (
       );
     }
 
-    const { groupId, expenseId, userId, amountOwed, splitType, percentage } =
-      body;
+    const { paymentId, groupId, fromUserId, toUserId, amount, currency } = body;
 
-    await ExpenseSplitService.createExpenseSplit(
+    await PaymentService.createPayment(
+      paymentId,
       groupId,
-      expenseId,
-      userId,
-      amountOwed,
-      splitType,
-      percentage,
+      fromUserId,
+      toUserId,
+      amount,
+      currency,
     );
 
     return ResponseManager.sendSuccess('Expense created successfully');

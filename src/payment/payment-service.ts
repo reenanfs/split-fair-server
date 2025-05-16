@@ -2,45 +2,38 @@ import { PutItemCommand, PutItemCommandOutput } from '@aws-sdk/client-dynamodb';
 import { marshall } from '@aws-sdk/util-dynamodb';
 
 import { dynamoClient } from '@database';
-import { Expense } from './expense-model';
+import { Payment } from './payment-model';
 
 const TABLE_NAME = process.env.TABLE_NAME;
 
-export class ExpenseService {
-  static async createExpense(
+export class PaymentService {
+  static async createPayment(
+    paymentId: string,
     groupId: string,
-    expenseId: string,
-    userId: string,
-    description: string,
-    totalAmount: number,
+    fromUserId: string,
+    toUserId: string,
+    amount: number,
     currency: string,
-    paidByUserId: string,
-    category?: string,
   ): Promise<PutItemCommandOutput> {
     const timestamp = new Date().toISOString();
 
-    const expense: Expense = {
+    const payment: Payment = {
       pk: `GROUP#${groupId}`,
-      sk: `EXPENSE#${expenseId}`,
+      sk: `PAYMENT#${paymentId}`,
+      payment_id: paymentId,
       group_id: groupId,
-      expense_id: expenseId,
-      description,
-      total_amount: totalAmount,
+      from_user: fromUserId,
+      to_user: toUserId,
+      amount,
       currency,
-      created_by: userId,
-      paid_by: paidByUserId,
       created_at: timestamp,
       updated_at: timestamp,
     };
 
-    if (category) {
-      expense.category = category;
-    }
-
     return dynamoClient.send(
       new PutItemCommand({
         TableName: TABLE_NAME,
-        Item: marshall(expense),
+        Item: marshall(payment),
       }),
     );
   }

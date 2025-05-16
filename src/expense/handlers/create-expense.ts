@@ -16,7 +16,7 @@ const createExpenseSchema = z.object({
   category: z.string().optional(),
 });
 
-export const createGroup = async (
+export const createExpense = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   try {
