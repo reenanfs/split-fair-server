@@ -41,7 +41,7 @@ export const createExpenseSplit = async (
       percentage,
     );
 
-    return ResponseManager.sendSuccess('Expense created successfully');
+    return ResponseManager.sendSuccess('Expense split created successfully');
   } catch (error) {
     console.log(error);
     return ResponseManager.sendInternalServerError();

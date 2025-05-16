@@ -3,14 +3,11 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
 
 import { ResponseManager } from '@utils/response-manager';
-import { PaymentService } from '../payment-service';
+import { BalanceService } from '../balance-service';
 
 const createPaymentSchema = z.object({
-  paymentId: z.string().min(1),
   groupId: z.string().min(1),
-  fromUserId: z.string().min(1),
-  toUserId: z.string().min(1),
-  amount: z.number().nonnegative(),
+  userId: z.string().min(1),
   currency: z.string().min(1),
 });
 
@@ -29,18 +26,11 @@ export const createPayment = async (
       );
     }
 
-    const { paymentId, groupId, fromUserId, toUserId, amount, currency } = body;
+    const { groupId, userId, currency } = body;
 
-    await PaymentService.createPayment(
-      paymentId,
-      groupId,
-      fromUserId,
-      toUserId,
-      amount,
-      currency,
-    );
+    await BalanceService.createBalance(groupId, userId, currency);
 
-    return ResponseManager.sendSuccess('Expense created successfully');
+    return ResponseManager.sendSuccess('Balance created successfully');
   } catch (error) {
     console.log(error);
     return ResponseManager.sendInternalServerError();

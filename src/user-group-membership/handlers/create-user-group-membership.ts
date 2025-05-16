@@ -34,7 +34,9 @@ export const createUserGroupMembership = async (
       role,
     );
 
-    return ResponseManager.sendSuccess('Group created successfully');
+    return ResponseManager.sendSuccess(
+      'User group membership created successfully',
+    );
   } catch (error) {
     console.log(error);
     return ResponseManager.sendInternalServerError();
