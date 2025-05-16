@@ -1,9 +1,9 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { z } from "zod";
+import { z } from 'zod';
 
-import { ResponseManager } from "@utils/response-manager";
-import { GroupService } from "../group-service";
+import { ResponseManager } from '@utils/response-manager';
+import { GroupService } from '../group-service';
 
 const createGroupSchema = z.object({
   name: z.string().min(1),
@@ -11,17 +11,17 @@ const createGroupSchema = z.object({
 });
 
 export const createGroup = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   try {
-    const body = JSON.parse(event.body || "{}");
+    const body = JSON.parse(event.body || '{}');
 
     const valdiation = createGroupSchema.safeParse(body);
 
     if (!valdiation.success) {
       return ResponseManager.sendBadRequest(
-        "Validation error",
-        valdiation.error.flatten()
+        'Validation error',
+        valdiation.error.flatten(),
       );
     }
 
@@ -29,7 +29,7 @@ export const createGroup = async (
 
     await GroupService.createGroup(name, userId);
 
-    return ResponseManager.sendSuccess("Group created successfully");
+    return ResponseManager.sendSuccess('Group created successfully');
   } catch (error) {
     console.log(error);
     return ResponseManager.sendInternalServerError();

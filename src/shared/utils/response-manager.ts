@@ -1,4 +1,4 @@
-import { APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayProxyResult } from 'aws-lambda';
 
 export interface IApiResult {
   ok: boolean;
@@ -10,7 +10,7 @@ export interface IApiResult {
 export class ResponseManager {
   static sendSuccess(
     message: string,
-    data?: object | any[]
+    data?: object | any[],
   ): APIGatewayProxyResult {
     const apiResult: IApiResult = {
       ok: true,
@@ -26,7 +26,7 @@ export class ResponseManager {
 
   static sendBadRequest(
     message: string,
-    errors?: object | any[]
+    errors?: object | any[],
   ): APIGatewayProxyResult {
     const apiResult: IApiResult = {
       ok: false,
@@ -43,7 +43,7 @@ export class ResponseManager {
   static sendInternalServerError(): APIGatewayProxyResult {
     const apiResult: IApiResult = {
       ok: false,
-      message: "Internal server error",
+      message: 'Internal server error',
     };
 
     return {

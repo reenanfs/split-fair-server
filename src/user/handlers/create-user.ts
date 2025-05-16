@@ -1,9 +1,9 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { z } from "zod";
+import { z } from 'zod';
 
-import { ResponseManager } from "@utils/response-manager";
-import { UserService } from "../user-service";
+import { ResponseManager } from '@utils/response-manager';
+import { UserService } from '../user-service';
 
 const createUserSchema = z.object({
   name: z.string().min(1),
@@ -12,17 +12,17 @@ const createUserSchema = z.object({
 });
 
 export const createUser = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   try {
-    const body = JSON.parse(event.body || "{}");
+    const body = JSON.parse(event.body || '{}');
 
     const valdiation = createUserSchema.safeParse(body);
 
     if (!valdiation.success) {
       return ResponseManager.sendBadRequest(
-        "Validation error",
-        valdiation.error.flatten()
+        'Validation error',
+        valdiation.error.flatten(),
       );
     }
 
@@ -30,7 +30,7 @@ export const createUser = async (
 
     await UserService.createUser(name, email, phone);
 
-    return ResponseManager.sendSuccess("User created successfully");
+    return ResponseManager.sendSuccess('User created successfully');
   } catch (error) {
     console.log(error);
     return ResponseManager.sendInternalServerError();
