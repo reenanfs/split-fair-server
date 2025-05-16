@@ -12,7 +12,6 @@ export class UserService {
     name: string,
     email: string,
     phone?: number,
-    profile_picture_url?: string
   ): Promise<PutItemCommandOutput> {
     const userId = uuidv4();
     const timestamp = new Date().toISOString();
@@ -29,10 +28,6 @@ export class UserService {
 
     if (phone) {
       user.phone = phone;
-    }
-
-    if (profile_picture_url) {
-      user.profile_picture_url = profile_picture_url;
     }
 
     return dynamoClient.send(
