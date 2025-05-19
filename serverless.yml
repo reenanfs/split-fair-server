@@ -1,12 +1,25 @@
 # "org" ensures this Service is used with the correct Serverless Framework Access Key.
 org: reenanfs
-service: splitfair
+service: ${env:SERVERLESS_STACK_NAME_MAIN}
+
+useDotenv: true
 
 provider:
   name: aws
   runtime: nodejs20.x
   region: sa-east-1
-  stage: dev
+  stage: ${opt:stage, 'dev'}
+  environment:
+    TABLE_NAME: ${self:custom.dynamoDb.tableName}
+  httpApi:
+    cors: true
+    authorizers:
+      httpApiCognitoAuthorizer:
+        type: jwt
+        identitySource: $request.header.Authorization
+        issuerUrl: https://cognito-idp.${self:provider.region}.amazonaws.com/${cf:${env:SERVERLESS_STACK_NAME_INFRA}-${self:provider.stage}.cognitoUserPool}
+        audience:
+          - ${cf:${env:SERVERLESS_STACK_NAME_INFRA}-${self:provider.stage}.cognitoUserPoolClient}
   iam:
     role:
       statements:
@@ -16,21 +29,22 @@ provider:
             - dynamodb:GetItem
             - dynamodb:Query
           Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.dynamoDb.tableName}
-  environment:
-    TABLE_NAME: ${self:custom.dynamoDb.tableName}
 
 custom:
+  cognito:
+    userPoolName: ${env:SERVERLESS_STACK_NAME_INFRA}-${self:provider.stage}
   dynamoDb:
-    tableName: ${self:service}-${self:provider.stage}
+    tableName: ${env:SERVERLESS_STACK_NAME_INFRA}-${self:provider.stage}
 
 functions:
   # User entity functions
   createUser:
     handler: src/user/handlers/create-user.createUser
     events:
-      - httpApi:
-          method: POST
-          path: /api/v1/users
+      - cognitoUserPool:
+          pool: ${self:custom.cognito.userPoolName}
+          trigger: PostConfirmation
+          existing: true
 
   # Group entity functions
   createGroup:
@@ -39,6 +53,8 @@ functions:
       - httpApi:
           method: POST
           path: /api/v1/groups
+          authorizer:
+            name: httpApiCognitoAuthorizer
 
   # UserGroupMembership entity functions
   createUserGroupMembership:
@@ -47,6 +63,8 @@ functions:
       - httpApi:
           method: POST
           path: /api/v1/user-group-memberships
+          authorizer:
+            name: httpApiCognitoAuthorizer
 
   # Expense entity functions
   createExpense:
@@ -55,6 +73,8 @@ functions:
       - httpApi:
           method: POST
           path: /api/v1/expenses
+          authorizer:
+            name: httpApiCognitoAuthorizer
 
   # ExpenseSplit entity functions
   createExpenseSplit:
@@ -63,6 +83,8 @@ functions:
       - httpApi:
           method: POST
           path: /api/v1/expense-splits
+          authorizer:
+            name: httpApiCognitoAuthorizer
 
   # Payment entity functions
   createPayment:
@@ -71,6 +93,8 @@ functions:
       - httpApi:
           method: POST
           path: /api/v1/payments
+          authorizer:
+            name: httpApiCognitoAuthorizer
 
   # Balance entity functions
   createBalance:
@@ -79,21 +103,5 @@ functions:
       - httpApi:
           method: POST
           path: /api/v1/balances
-
-resources:
-  Resources:
-    DynamoDBTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:custom.dynamoDb.tableName}
-        BillingMode: PAY_PER_REQUEST
-        AttributeDefinitions:
-          - AttributeName: pk
-            AttributeType: S
-          - AttributeName: sk
-            AttributeType: S
-        KeySchema:
-          - AttributeName: pk
-            KeyType: HASH
-          - AttributeName: sk
-            KeyType: RANGE
+          authorizer:
+            name: httpApiCognitoAuthorizer

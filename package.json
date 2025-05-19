@@ -4,6 +4,7 @@
   "description": "SplitFair server",
   "scripts": {
     "deploy": "serverless deploy",
+    "deploy-infra": "serverless deploy --config serverless.infra.yml",
     "dev": "serverless dev",
     "offline": "serverless offline"
   },
