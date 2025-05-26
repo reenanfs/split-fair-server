@@ -34,7 +34,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ github.ref_name == 'main' && 'arn:aws:iam::187977876128:role/SplitFairGitHubActionsDeployRoleProd' || arn:aws:iam::002540790653:role/SplitFairGitHubActionsDeployRoleDev}}
+          role-to-assume: ${{ github.ref_name == 'main' && 'arn:aws:iam::187977876128:role/SplitFairGitHubActionsDeployRoleProd' || 'arn:aws:iam::002540790653:role/SplitFairGitHubActionsDeployRoleDev' }}
           aws-region: sa-east-1
 
       - name: Deploy Infra
