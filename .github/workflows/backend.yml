@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   deploy-backend:
+    environment: ${{ github.ref_name == 'main' && 'prod' || 'dev' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -32,10 +33,11 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ github.ref_name == 'main' && 'arn:aws:iam::187977876128:role/SplitFairGitHubActionsDeployRoleProd' || 'arn:aws:iam::002540790653:role/SplitFairGitHubActionsDeployRoleDev' }}
-          aws-region: sa-east-1
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Deploy Backend
-        run: |
-          STAGE=${{ github.ref_name == 'main' && 'prod' || 'dev' }}
-          sls deploy --stage $STAGE
+        env:
+          SERVERLESS_STACK_NAME_MAIN: ${{ vars.SERVERLESS_STACK_NAME_MAIN }}
+          SERVERLESS_STACK_NAME_INFRA: ${{ vars.SERVERLESS_STACK_NAME_INFRA }}
+        run: sls deploy --stage $APP_STAGE
