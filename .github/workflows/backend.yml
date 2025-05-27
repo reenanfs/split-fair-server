@@ -40,4 +40,5 @@ jobs:
         env:
           SERVERLESS_STACK_NAME_MAIN: ${{ vars.SERVERLESS_STACK_NAME_MAIN }}
           SERVERLESS_STACK_NAME_INFRA: ${{ vars.SERVERLESS_STACK_NAME_INFRA }}
+          APP_STAGE: ${{ vars.APP_STAGE }}
         run: sls deploy --stage $APP_STAGE
