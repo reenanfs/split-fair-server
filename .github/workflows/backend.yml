@@ -28,7 +28,7 @@ jobs:
         run: npm ci
 
       - name: Install Serverless Framework
-        run: npm install -g serverless@3
+        run: npm install -g serverless
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -41,4 +41,4 @@ jobs:
           SERVERLESS_STACK_NAME_MAIN: ${{ vars.SERVERLESS_STACK_NAME_MAIN }}
           SERVERLESS_STACK_NAME_INFRA: ${{ vars.SERVERLESS_STACK_NAME_INFRA }}
           APP_STAGE: ${{ vars.APP_STAGE }}
-        run: sls deploy --stage $APP_STAGE
+        run: sls deploy --stage $APP_STAGE --console-disable

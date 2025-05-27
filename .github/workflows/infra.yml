@@ -43,4 +43,4 @@ jobs:
           SERVERLESS_STACK_NAME_MAIN: ${{ vars.SERVERLESS_STACK_NAME_MAIN }}
           SERVERLESS_STACK_NAME_INFRA: ${{ vars.SERVERLESS_STACK_NAME_INFRA }}
           APP_STAGE: ${{ vars.APP_STAGE }}
-        run: sls deploy --config serverless.infra.yml --stage $APP_STAGE
+        run: sls deploy --config serverless.infra.yml --stage $APP_STAGE --console-disable
