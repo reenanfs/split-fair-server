@@ -41,4 +41,5 @@ jobs:
           SERVERLESS_STACK_NAME_MAIN: ${{ vars.SERVERLESS_STACK_NAME_MAIN }}
           SERVERLESS_STACK_NAME_INFRA: ${{ vars.SERVERLESS_STACK_NAME_INFRA }}
           APP_STAGE: ${{ vars.APP_STAGE }}
-        run: sls deploy --stage $APP_STAGE --console-disable
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+        run: sls deploy --stage $APP_STAGE

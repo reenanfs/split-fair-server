@@ -6,7 +6,9 @@
     "deploy": "serverless deploy",
     "deploy-infra": "serverless deploy --config serverless.infra.yml",
     "dev": "serverless dev",
-    "offline": "serverless offline"
+    "offline": "serverless offline",
+    "remove": "serverless remove",
+    "remove-infra": "serverless remove --config serverless.infra.yml"
   },
   "devDependencies": {
     "@eslint/js": "^9.26.0",
