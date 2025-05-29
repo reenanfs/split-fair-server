@@ -8,7 +8,6 @@ import { ExpenseSplitService } from '../expense-split-service';
 const createExpenseSplitSchema = z.object({
   groupId: z.string().min(1),
   expenseId: z.string().min(1),
-  userId: z.string().min(1),
   amountOwed: z.number().nonnegative(),
   splitType: z.string().min(1),
   percentage: z.number().min(0).max(1),
@@ -18,6 +17,12 @@ export const createExpenseSplit = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   try {
+    const userId = event.requestContext.authorizer?.jwt?.claims?.sub;
+
+    if (!userId) {
+      return ResponseManager.sendUnauthorizedRequest('User not authorized');
+    }
+
     const body = JSON.parse(event.body || '{}');
 
     const valdiation = createExpenseSplitSchema.safeParse(body);
@@ -29,8 +34,7 @@ export const createExpenseSplit = async (
       );
     }
 
-    const { groupId, expenseId, userId, amountOwed, splitType, percentage } =
-      body;
+    const { groupId, expenseId, amountOwed, splitType, percentage } = body;
 
     await ExpenseSplitService.createExpenseSplit(
       groupId,

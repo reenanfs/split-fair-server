@@ -22,6 +22,7 @@ export class ExpenseService {
     const expense: Expense = {
       pk: `GROUP#${groupId}`,
       sk: `EXPENSE#${expenseId}`,
+      entity: 'expense',
       group_id: groupId,
       expense_id: expenseId,
       description,

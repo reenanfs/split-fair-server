@@ -1,6 +1,7 @@
 export interface Group {
   pk: string;
   sk: string;
+  entity: string;
   group_id: string;
   name: string;
   profile_picture_url?: string;

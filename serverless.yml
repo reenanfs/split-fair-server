@@ -4,6 +4,9 @@ service: ${env:SERVERLESS_STACK_NAME_MAIN}
 
 useDotenv: true
 
+plugins:
+  - serverless-offline
+
 provider:
   name: aws
   runtime: nodejs20.x
@@ -56,13 +59,13 @@ functions:
           authorizer:
             name: httpApiCognitoAuthorizer
 
-  # UserGroupMembership entity functions
-  createUserGroupMembership:
-    handler: src/user-group-membership/handlers/create-user-group-membership.createUserGroupMembership
+  # GroupMembership entity functions
+  createGroupMembership:
+    handler: src/group-membership/handlers/create-group-membership.createGroupMembership
     events:
       - httpApi:
           method: POST
-          path: /api/v1/user-group-memberships
+          path: /api/v1/group-memberships
           authorizer:
             name: httpApiCognitoAuthorizer
 

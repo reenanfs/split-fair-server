@@ -7,13 +7,18 @@ import { GroupService } from '../group-service';
 
 const createGroupSchema = z.object({
   name: z.string().min(1),
-  userId: z.string().min(1),
 });
 
 export const createGroup = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   try {
+    const userId = event.requestContext.authorizer?.jwt?.claims?.sub;
+
+    if (!userId) {
+      return ResponseManager.sendUnauthorizedRequest('User not authorized');
+    }
+
     const body = JSON.parse(event.body || '{}');
 
     const valdiation = createGroupSchema.safeParse(body);
@@ -25,7 +30,7 @@ export const createGroup = async (
       );
     }
 
-    const { name, userId } = body;
+    const { name } = body;
 
     await GroupService.createGroup(name, userId);
 

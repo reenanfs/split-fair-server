@@ -1,6 +1,7 @@
 export interface Expense {
   pk: string;
   sk: string;
+  entity: string;
   group_id: string;
   expense_id: string;
   description: string;

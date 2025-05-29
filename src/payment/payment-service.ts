@@ -20,6 +20,7 @@ export class PaymentService {
     const payment: Payment = {
       pk: `GROUP#${groupId}`,
       sk: `PAYMENT#${paymentId}`,
+      entity: 'payment',
       payment_id: paymentId,
       group_id: groupId,
       from_user: fromUserId,

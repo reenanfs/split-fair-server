@@ -3,14 +3,14 @@ import { APIGatewayProxyResult } from 'aws-lambda';
 export interface IApiResult {
   ok: boolean;
   message?: string;
-  data?: object | any[];
-  errors?: any;
+  data?: object | unknown[];
+  errors?: unknown;
 }
 
 export class ResponseManager {
   static sendSuccess(
     message: string,
-    data?: object | any[],
+    data?: object | unknown[],
   ): APIGatewayProxyResult {
     const apiResult: IApiResult = {
       ok: true,
@@ -26,7 +26,7 @@ export class ResponseManager {
 
   static sendBadRequest(
     message: string,
-    errors?: object | any[],
+    errors?: object | unknown[],
   ): APIGatewayProxyResult {
     const apiResult: IApiResult = {
       ok: false,
@@ -35,7 +35,23 @@ export class ResponseManager {
     };
 
     return {
-      statusCode: 200,
+      statusCode: 400,
+      body: JSON.stringify(apiResult),
+    };
+  }
+
+  static sendUnauthorizedRequest(
+    message: string,
+    errors?: object | unknown[],
+  ): APIGatewayProxyResult {
+    const apiResult: IApiResult = {
+      ok: false,
+      message,
+      errors,
+    };
+
+    return {
+      statusCode: 401,
       body: JSON.stringify(apiResult),
     };
   }

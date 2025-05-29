@@ -2,21 +2,22 @@ import { PutItemCommand, PutItemCommandOutput } from '@aws-sdk/client-dynamodb';
 import { marshall } from '@aws-sdk/util-dynamodb';
 
 import { dynamoClient } from '@database';
-import { UserGroupMembership } from './user-group-membership-model';
+import { GroupMembership, GroupRole } from './group-membership-model';
 
 const TABLE_NAME = process.env.TABLE_NAME;
 
-export class UserGroupMembershipService {
-  static async createUserGroupMembership(
+export class GroupMembershipService {
+  static async createGroupMembership(
     userId: string,
     groupId: string,
-    role: string,
+    role: GroupRole,
   ): Promise<PutItemCommandOutput> {
     const timestamp = new Date().toISOString();
 
-    const userGroupMembership: UserGroupMembership = {
+    const groupMembership: GroupMembership = {
       pk: `USER#${userId}`,
       sk: `GROUP#${groupId}`,
+      entity: 'group_membership',
       user_id: userId,
       group_id: groupId,
       role: role,
@@ -27,7 +28,7 @@ export class UserGroupMembershipService {
     return dynamoClient.send(
       new PutItemCommand({
         TableName: TABLE_NAME,
-        Item: marshall(userGroupMembership),
+        Item: marshall(groupMembership),
       }),
     );
   }

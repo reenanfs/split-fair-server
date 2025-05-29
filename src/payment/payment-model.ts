@@ -1,6 +1,7 @@
 export interface Payment {
   pk: string;
   sk: string;
+  entity: string;
   payment_id: string;
   group_id: string;
   from_user: string;

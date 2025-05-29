@@ -20,6 +20,7 @@ export class ExpenseSplitService {
     const expenseSplit: ExpenseSplit = {
       pk: `GROUP#${groupId}`,
       sk: `EXPENSE#${expenseId}SPLIT#${userId}`,
+      entity: 'expense_split',
       group_id: groupId,
       expense_id: expenseId,
       user_id: userId,

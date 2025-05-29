@@ -7,7 +7,6 @@ import { BalanceService } from '../balance-service';
 
 const createPaymentSchema = z.object({
   groupId: z.string().min(1),
-  userId: z.string().min(1),
   currency: z.string().min(1),
 });
 
@@ -15,6 +14,12 @@ export const createPayment = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   try {
+    const userId = event.requestContext.authorizer?.jwt?.claims?.sub;
+
+    if (!userId) {
+      return ResponseManager.sendUnauthorizedRequest('User not authorized');
+    }
+
     const body = JSON.parse(event.body || '{}');
 
     const valdiation = createPaymentSchema.safeParse(body);
@@ -26,7 +31,7 @@ export const createPayment = async (
       );
     }
 
-    const { groupId, userId, currency } = body;
+    const { groupId, currency } = body;
 
     await BalanceService.createBalance(groupId, userId, currency);
 

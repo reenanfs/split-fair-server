@@ -8,7 +8,6 @@ import { ExpenseService } from '../expense-service';
 const createExpenseSchema = z.object({
   groupId: z.string().min(1),
   expenseId: z.string().min(1),
-  userId: z.string().min(1),
   description: z.string().min(1),
   totalAmount: z.number().nonnegative(),
   currency: z.string().min(1),
@@ -20,6 +19,12 @@ export const createExpense = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   try {
+    const userId = event.requestContext.authorizer?.jwt?.claims?.sub;
+
+    if (!userId) {
+      return ResponseManager.sendUnauthorizedRequest('User not authorized');
+    }
+
     const body = JSON.parse(event.body || '{}');
 
     const valdiation = createExpenseSchema.safeParse(body);
@@ -34,7 +39,6 @@ export const createExpense = async (
     const {
       groupId,
       expenseId,
-      userId,
       description,
       totalAmount,
       currency,

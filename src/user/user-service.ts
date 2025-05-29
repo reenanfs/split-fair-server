@@ -18,6 +18,7 @@ export class UserService {
     const user: User = {
       pk: `USER#${userId}`,
       sk: `PROFILE`,
+      entity: 'user',
       user_id: userId,
       email: email,
       created_at: timestamp,

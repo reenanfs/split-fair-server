@@ -17,6 +17,7 @@ export class BalanceService {
     const payment: Payment = {
       pk: `GROUP#${groupId}`,
       sk: `BALANCE#${userId}`,
+      entity: 'balance',
       group_id: groupId,
       user_id: userId,
       currency,
