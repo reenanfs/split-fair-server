@@ -1,21 +1,21 @@
 import {
-  PutItemCommand,
-  PutItemCommandOutput,
+  BatchGetItemCommand,
+  QueryCommand,
   TransactWriteItemsCommand,
   TransactWriteItemsCommandOutput,
 } from '@aws-sdk/client-dynamodb';
-import { marshall } from '@aws-sdk/util-dynamodb';
+import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
+import { v4 as uuidv4 } from 'uuid';
 
 import { dynamoClient } from '@database';
-import { v4 as uuidv4 } from 'uuid';
 import { Group } from './group-model';
-
 import {
   GroupMembership,
   GroupRole,
 } from 'src/group-membership/group-membership-model';
+import { requireEnv } from '@utils/require-env';
 
-const TABLE_NAME = process.env.TABLE_NAME;
+const TABLE_NAME = requireEnv('TABLE_NAME');
 
 export class GroupService {
   static async createGroup(
@@ -70,12 +70,46 @@ export class GroupService {
     );
   }
 
-  static async getGroupsByUser(userId: string): Promise<PutItemCommandOutput> {
-    return dynamoClient.send(
-      new PutItemCommand({
+  static async getGroupsByUser(userId: string): Promise<Group[]> {
+    const queryResponse = await dynamoClient.send(
+      new QueryCommand({
         TableName: TABLE_NAME,
-        Item: marshall({ userId }),
+        KeyConditionExpression: 'pk = :pk and begins_with(sk, :sk)',
+        ExpressionAttributeValues: marshall({
+          ':pk': `USER#${userId}`,
+          ':sk': 'GROUP#',
+        }),
+        ProjectionExpression: 'group_id',
       }),
     );
+
+    const groupIds = queryResponse.Items?.map(
+      (item) => unmarshall(item).group_id,
+    );
+
+    if (!groupIds?.length) {
+      return [];
+    }
+
+    const keys = groupIds?.map((groupId) =>
+      marshall({
+        pk: `GROUP#${groupId}`,
+        sk: 'PROFILE',
+      }),
+    );
+
+    const batchResponse = await dynamoClient.send(
+      new BatchGetItemCommand({
+        RequestItems: {
+          [TABLE_NAME]: {
+            Keys: keys,
+          },
+        },
+      }),
+    );
+
+    const groups = batchResponse.Responses?.[TABLE_NAME] ?? [];
+
+    return groups.map((group) => unmarshall(group) as Group);
   }
 }

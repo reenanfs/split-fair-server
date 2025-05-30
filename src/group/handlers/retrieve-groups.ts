@@ -3,11 +3,11 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { ResponseManager } from '@utils/response-manager';
 import { GroupService } from '../group-service';
 
-export const getGroupsByUser = async (
+export const retrieveGroups = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   try {
-    const userId = event.requestContext.authorizer?.claims?.sub;
+    const userId = event.requestContext.authorizer?.jwt?.claims?.sub;
 
     if (!userId) {
       return ResponseManager.sendUnauthorizedRequest('User not authorized');

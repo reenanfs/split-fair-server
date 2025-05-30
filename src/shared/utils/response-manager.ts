@@ -63,7 +63,7 @@ export class ResponseManager {
     };
 
     return {
-      statusCode: 200,
+      statusCode: 500,
       body: JSON.stringify(apiResult),
     };
   }
