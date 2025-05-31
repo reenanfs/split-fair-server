@@ -1,10 +1,10 @@
-import { PutItemCommand, PutItemCommandOutput } from '@aws-sdk/client-dynamodb';
-import { marshall } from '@aws-sdk/util-dynamodb';
+import { PutCommandOutput } from '@aws-sdk/lib-dynamodb';
 
-import { dynamoClient } from '@database';
+import { dynamoDb } from '@database';
 import { ExpenseSplit } from './expense-split-model';
+import { requireEnv } from '@utils/require-env';
 
-const TABLE_NAME = process.env.TABLE_NAME;
+const TABLE_NAME = requireEnv('TABLE_NAME');
 
 export class ExpenseSplitService {
   static async createExpenseSplit(
@@ -14,7 +14,7 @@ export class ExpenseSplitService {
     amountOwed: number,
     splitType: string,
     percentage?: number,
-  ): Promise<PutItemCommandOutput> {
+  ): Promise<PutCommandOutput> {
     const timestamp = new Date().toISOString();
 
     const expenseSplit: ExpenseSplit = {
@@ -34,11 +34,9 @@ export class ExpenseSplitService {
       expenseSplit.percentage = percentage;
     }
 
-    return dynamoClient.send(
-      new PutItemCommand({
-        TableName: TABLE_NAME,
-        Item: marshall(expenseSplit),
-      }),
-    );
+    return dynamoDb.put({
+      TableName: TABLE_NAME,
+      Item: expenseSplit,
+    });
   }
 }

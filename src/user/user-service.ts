@@ -1,10 +1,10 @@
-import { PutItemCommand, PutItemCommandOutput } from '@aws-sdk/client-dynamodb';
-import { marshall } from '@aws-sdk/util-dynamodb';
+import { PutCommandOutput } from '@aws-sdk/lib-dynamodb';
 
-import { dynamoClient } from '@database';
+import { dynamoDb } from '@database';
 import { User } from './user-model';
+import { requireEnv } from '@utils/require-env';
 
-const TABLE_NAME = process.env.TABLE_NAME;
+const TABLE_NAME = requireEnv('TABLE_NAME');
 
 export class UserService {
   static async createUser(
@@ -12,7 +12,7 @@ export class UserService {
     email: string,
     name?: string,
     phone?: number,
-  ): Promise<PutItemCommandOutput> {
+  ): Promise<PutCommandOutput> {
     const timestamp = new Date().toISOString();
 
     const user: User = {
@@ -33,11 +33,9 @@ export class UserService {
       user.phone = phone;
     }
 
-    return dynamoClient.send(
-      new PutItemCommand({
-        TableName: TABLE_NAME,
-        Item: marshall(user),
-      }),
-    );
+    return dynamoDb.put({
+      TableName: TABLE_NAME,
+      Item: user,
+    });
   }
 }

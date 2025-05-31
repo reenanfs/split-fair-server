@@ -1,4 +1,4 @@
-export interface Payment {
+export interface Balance {
   pk: string;
   sk: string;
   entity: string;

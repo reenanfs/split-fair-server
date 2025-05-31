@@ -1,10 +1,10 @@
-import { PutItemCommand, PutItemCommandOutput } from '@aws-sdk/client-dynamodb';
-import { marshall } from '@aws-sdk/util-dynamodb';
+import { PutCommandOutput } from '@aws-sdk/lib-dynamodb';
 
-import { dynamoClient } from '@database';
+import { dynamoDb } from '@database';
 import { Expense } from './expense-model';
+import { requireEnv } from '@utils/require-env';
 
-const TABLE_NAME = process.env.TABLE_NAME;
+const TABLE_NAME = requireEnv('TABLE_NAME');
 
 export class ExpenseService {
   static async createExpense(
@@ -16,7 +16,7 @@ export class ExpenseService {
     currency: string,
     paidByUserId: string,
     category?: string,
-  ): Promise<PutItemCommandOutput> {
+  ): Promise<PutCommandOutput> {
     const timestamp = new Date().toISOString();
 
     const expense: Expense = {
@@ -38,11 +38,9 @@ export class ExpenseService {
       expense.category = category;
     }
 
-    return dynamoClient.send(
-      new PutItemCommand({
-        TableName: TABLE_NAME,
-        Item: marshall(expense),
-      }),
-    );
+    return dynamoDb.put({
+      TableName: TABLE_NAME,
+      Item: expense,
+    });
   }
 }
