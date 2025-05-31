@@ -1,5 +1,3 @@
-import { PutCommandOutput } from '@aws-sdk/lib-dynamodb';
-
 import { dynamoDb } from '@database';
 import { ExpenseSplit } from './expense-split-model';
 import { requireEnv } from '@utils/require-env';
@@ -14,7 +12,7 @@ export class ExpenseSplitService {
     amountOwed: number,
     splitType: string,
     percentage?: number,
-  ): Promise<PutCommandOutput> {
+  ): Promise<ExpenseSplit> {
     const timestamp = new Date().toISOString();
 
     const expenseSplit: ExpenseSplit = {
@@ -34,9 +32,11 @@ export class ExpenseSplitService {
       expenseSplit.percentage = percentage;
     }
 
-    return dynamoDb.put({
+    await dynamoDb.put({
       TableName: TABLE_NAME,
       Item: expenseSplit,
     });
+
+    return expenseSplit;
   }
 }

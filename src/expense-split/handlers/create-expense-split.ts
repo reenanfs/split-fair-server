@@ -4,6 +4,8 @@ import { z } from 'zod';
 
 import { ResponseManager } from '@utils/response-manager';
 import { ExpenseSplitService } from '../expense-split-service';
+import { ExpenseSplit } from '../expense-split-model';
+import { handleApiError } from 'src/shared/errors/handle-api-error';
 
 const createExpenseSplitSchema = z.object({
   groupId: z.string().min(1),
@@ -20,23 +22,24 @@ export const createExpenseSplit = async (
     const userId = event.requestContext.authorizer?.jwt?.claims?.sub;
 
     if (!userId) {
-      return ResponseManager.sendUnauthorizedRequest('User not authorized');
+      return ResponseManager.sendUnauthorizedRequest();
     }
 
-    const body = JSON.parse(event.body || '{}');
+    const parsed = createExpenseSplitSchema.safeParse(
+      JSON.parse(event.body || '{}'),
+    );
 
-    const valdiation = createExpenseSplitSchema.safeParse(body);
-
-    if (!valdiation.success) {
+    if (!parsed.success) {
       return ResponseManager.sendBadRequest(
         'Validation error',
-        valdiation.error.flatten(),
+        parsed.error.flatten(),
       );
     }
 
-    const { groupId, expenseId, amountOwed, splitType, percentage } = body;
+    const { groupId, expenseId, amountOwed, splitType, percentage } =
+      parsed.data;
 
-    await ExpenseSplitService.createExpenseSplit(
+    const expenseSplit = await ExpenseSplitService.createExpenseSplit(
       groupId,
       expenseId,
       userId,
@@ -45,9 +48,11 @@ export const createExpenseSplit = async (
       percentage,
     );
 
-    return ResponseManager.sendSuccess('Expense split created successfully');
-  } catch (error) {
-    console.log(error);
-    return ResponseManager.sendInternalServerError();
+    return ResponseManager.sendSuccess<ExpenseSplit>(
+      'Expense split created successfully',
+      expenseSplit,
+    );
+  } catch (error: unknown) {
+    return handleApiError(error);
   }
 };

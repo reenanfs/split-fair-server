@@ -4,10 +4,12 @@ import { z } from 'zod';
 
 import { ResponseManager } from '@utils/response-manager';
 import { GroupMembershipService } from '../group-membership-service';
+import { GroupMembership, GroupRole } from '../group-membership-model';
+import { handleApiError } from 'src/shared/errors/handle-api-error';
 
 const createGroupMembershipSchema = z.object({
   groupId: z.string().min(1),
-  role: z.string().min(1),
+  role: z.nativeEnum(GroupRole),
 });
 
 export const createGroupMembership = async (
@@ -17,29 +19,33 @@ export const createGroupMembership = async (
     const userId = event.requestContext.authorizer?.jwt?.claims?.sub;
 
     if (!userId) {
-      return ResponseManager.sendUnauthorizedRequest('User not authorized');
+      return ResponseManager.sendUnauthorizedRequest();
     }
 
-    const body = JSON.parse(event.body || '{}');
+    const parsed = createGroupMembershipSchema.safeParse(
+      JSON.parse(event.body || '{}'),
+    );
 
-    const valdiation = createGroupMembershipSchema.safeParse(body);
-
-    if (!valdiation.success) {
+    if (!parsed.success) {
       return ResponseManager.sendBadRequest(
         'Validation error',
-        valdiation.error.flatten(),
+        parsed.error.flatten(),
       );
     }
 
-    const { groupId, role } = body;
+    const { groupId, role } = parsed.data;
 
-    await GroupMembershipService.createGroupMembership(userId, groupId, role);
-
-    return ResponseManager.sendSuccess(
-      'User group membership created successfully',
+    const groupMembership = await GroupMembershipService.createGroupMembership(
+      userId,
+      groupId,
+      role,
     );
-  } catch (error) {
-    console.log(error);
-    return ResponseManager.sendInternalServerError();
+
+    return ResponseManager.sendSuccess<GroupMembership[]>(
+      'User group membership created successfully',
+      groupMembership,
+    );
+  } catch (error: unknown) {
+    return handleApiError(error);
   }
 };

@@ -1,18 +1,27 @@
 import { APIGatewayProxyResult } from 'aws-lambda';
 
-export interface IApiResult {
+export interface ApiResult<T> {
   ok: boolean;
   message?: string;
-  data?: object | unknown[];
-  errors?: unknown;
+  data?: T;
+}
+
+type ValidationError = {
+  fieldErrors: Record<string, string[]>;
+  formErrors: string[];
+};
+
+export type errorDetails = string[] | ValidationError;
+
+export interface ApiError {
+  ok: boolean;
+  message?: string;
+  errors?: errorDetails;
 }
 
 export class ResponseManager {
-  static sendSuccess(
-    message: string,
-    data?: object | unknown[],
-  ): APIGatewayProxyResult {
-    const apiResult: IApiResult = {
+  static sendSuccess<T>(message: string, data?: T): APIGatewayProxyResult {
+    const apiResult: ApiResult<T> = {
       ok: true,
       message,
       data,
@@ -26,9 +35,9 @@ export class ResponseManager {
 
   static sendBadRequest(
     message: string,
-    errors?: object | unknown[],
+    errors?: errorDetails,
   ): APIGatewayProxyResult {
-    const apiResult: IApiResult = {
+    const apiError: ApiError = {
       ok: false,
       message,
       errors,
@@ -36,18 +45,14 @@ export class ResponseManager {
 
     return {
       statusCode: 400,
-      body: JSON.stringify(apiResult),
+      body: JSON.stringify(apiError),
     };
   }
 
-  static sendUnauthorizedRequest(
-    message: string,
-    errors?: object | unknown[],
-  ): APIGatewayProxyResult {
-    const apiResult: IApiResult = {
+  static sendUnauthorizedRequest(): APIGatewayProxyResult {
+    const apiResult: ApiError = {
       ok: false,
-      message,
-      errors,
+      message: 'Not authorized',
     };
 
     return {
@@ -56,8 +61,20 @@ export class ResponseManager {
     };
   }
 
+  static sendNotFoundError(message: string): APIGatewayProxyResult {
+    const apiResult: ApiError = {
+      ok: false,
+      message,
+    };
+
+    return {
+      statusCode: 404,
+      body: JSON.stringify(apiResult),
+    };
+  }
+
   static sendInternalServerError(): APIGatewayProxyResult {
-    const apiResult: IApiResult = {
+    const apiResult: ApiError = {
       ok: false,
       message: 'Internal server error',
     };

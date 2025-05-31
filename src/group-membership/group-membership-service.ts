@@ -1,5 +1,3 @@
-import { PutCommandOutput } from '@aws-sdk/lib-dynamodb';
-
 import { dynamoDb } from '@database';
 import { GroupMembership, GroupRole } from './group-membership-model';
 import { requireEnv } from '@utils/require-env';
@@ -11,7 +9,7 @@ export class GroupMembershipService {
     userId: string,
     groupId: string,
     role: GroupRole,
-  ): Promise<PutCommandOutput> {
+  ): Promise<GroupMembership[]> {
     const timestamp = new Date().toISOString();
 
     const groupMembership: GroupMembership = {
@@ -25,9 +23,37 @@ export class GroupMembershipService {
       updated_at: timestamp,
     };
 
-    return dynamoDb.put({
-      TableName: TABLE_NAME,
-      Item: groupMembership,
+    const userMembership: GroupMembership = {
+      pk: `GROUP#${groupId}`,
+      sk: `USER#${userId}`,
+      entity: 'group_membership',
+      user_id: userId,
+      group_id: groupId,
+      role: role,
+      created_at: timestamp,
+      updated_at: timestamp,
+    };
+
+    await dynamoDb.transactWrite({
+      TransactItems: [
+        {
+          Put: {
+            TableName: TABLE_NAME,
+            Item: groupMembership,
+            ConditionExpression: 'attribute_not_exists(PK)',
+          },
+        },
+        {
+          Put: {
+            TableName: TABLE_NAME,
+            Item: userMembership,
+            ConditionExpression:
+              'attribute_not_exists(PK) AND attribute_not_exists(SK) ',
+          },
+        },
+      ],
     });
+
+    return [groupMembership, userMembership];
   }
 }

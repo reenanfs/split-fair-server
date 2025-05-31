@@ -4,24 +4,20 @@ import { z } from 'zod';
 
 import { ResponseManager } from '@utils/response-manager';
 import { GroupService } from '../group-service';
-import { Group } from '../group-model';
+import { GroupDetails } from '../group-model';
 import { handleApiError } from 'src/shared/errors/handle-api-error';
 
-const createGroupSchema = z.object({
-  name: z.string().min(1),
+const retrieveGroupDetailsSchema = z.object({
+  groupId: z.string().min(1),
 });
 
-export const createGroup = async (
+export const retrieveGroupDetails = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   try {
-    const userId = event.requestContext.authorizer?.jwt?.claims?.sub;
-
-    if (!userId) {
-      return ResponseManager.sendUnauthorizedRequest();
-    }
-
-    const parsed = createGroupSchema.safeParse(JSON.parse(event.body || '{}'));
+    const parsed = retrieveGroupDetailsSchema.safeParse(
+      JSON.parse(event.body || '{}'),
+    );
 
     if (!parsed.success) {
       return ResponseManager.sendBadRequest(
@@ -30,13 +26,13 @@ export const createGroup = async (
       );
     }
 
-    const { name } = parsed.data;
+    const { groupId } = parsed.data;
 
-    const group = await GroupService.createGroup(name, userId);
+    const groupDetails = await GroupService.getGroupDetails(groupId);
 
-    return ResponseManager.sendSuccess<Group>(
-      'Group created successfully',
-      group,
+    return ResponseManager.sendSuccess<GroupDetails>(
+      'Group details retrieved successfully',
+      groupDetails,
     );
   } catch (error: unknown) {
     return handleApiError(error);

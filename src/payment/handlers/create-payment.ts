@@ -4,9 +4,10 @@ import { z } from 'zod';
 
 import { ResponseManager } from '@utils/response-manager';
 import { PaymentService } from '../payment-service';
+import { Payment } from '../payment-model';
+import { handleApiError } from 'src/shared/errors/handle-api-error';
 
 const createPaymentSchema = z.object({
-  paymentId: z.string().min(1),
   groupId: z.string().min(1),
   fromUserId: z.string().min(1),
   toUserId: z.string().min(1),
@@ -18,21 +19,20 @@ export const createPayment = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   try {
-    const body = JSON.parse(event.body || '{}');
+    const parsed = createPaymentSchema.safeParse(
+      JSON.parse(event.body || '{}'),
+    );
 
-    const valdiation = createPaymentSchema.safeParse(body);
-
-    if (!valdiation.success) {
+    if (!parsed.success) {
       return ResponseManager.sendBadRequest(
         'Validation error',
-        valdiation.error.flatten(),
+        parsed.error.flatten(),
       );
     }
 
-    const { paymentId, groupId, fromUserId, toUserId, amount, currency } = body;
+    const { groupId, fromUserId, toUserId, amount, currency } = parsed.data;
 
-    await PaymentService.createPayment(
-      paymentId,
+    const payment = await PaymentService.createPayment(
       groupId,
       fromUserId,
       toUserId,
@@ -40,9 +40,11 @@ export const createPayment = async (
       currency,
     );
 
-    return ResponseManager.sendSuccess('Payment created successfully');
-  } catch (error) {
-    console.log(error);
-    return ResponseManager.sendInternalServerError();
+    return ResponseManager.sendSuccess<Payment>(
+      'Payment created successfully',
+      payment,
+    );
+  } catch (error: unknown) {
+    return handleApiError(error);
   }
 };

@@ -1,5 +1,3 @@
-import { PutCommandOutput } from '@aws-sdk/lib-dynamodb';
-
 import { dynamoDb } from '@database';
 import { Balance } from './balance-model';
 import { requireEnv } from '@utils/require-env';
@@ -11,7 +9,7 @@ export class BalanceService {
     groupId: string,
     userId: string,
     currency: string,
-  ): Promise<PutCommandOutput> {
+  ): Promise<Balance> {
     const timestamp = new Date().toISOString();
 
     const balance: Balance = {
@@ -26,9 +24,28 @@ export class BalanceService {
       updated_at: timestamp,
     };
 
-    return dynamoDb.put({
+    await dynamoDb.put({
       TableName: TABLE_NAME,
       Item: balance,
     });
+
+    return balance;
+  }
+
+  static async getBalancesByGroup(groupId: string): Promise<Balance[]> {
+    const { Items: balances } = await dynamoDb.query({
+      TableName: TABLE_NAME,
+      KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk)',
+      ExpressionAttributeValues: {
+        ':pk': `GROUP#${groupId}`,
+        ':sk': 'BALANCE#',
+      },
+    });
+
+    if (!balances?.length) {
+      return [];
+    }
+
+    return balances as Balance[];
   }
 }

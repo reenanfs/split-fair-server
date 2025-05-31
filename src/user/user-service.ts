@@ -1,5 +1,3 @@
-import { PutCommandOutput } from '@aws-sdk/lib-dynamodb';
-
 import { dynamoDb } from '@database';
 import { User } from './user-model';
 import { requireEnv } from '@utils/require-env';
@@ -12,7 +10,7 @@ export class UserService {
     email: string,
     name?: string,
     phone?: number,
-  ): Promise<PutCommandOutput> {
+  ): Promise<User> {
     const timestamp = new Date().toISOString();
 
     const user: User = {
@@ -33,9 +31,11 @@ export class UserService {
       user.phone = phone;
     }
 
-    return dynamoDb.put({
+    await dynamoDb.put({
       TableName: TABLE_NAME,
       Item: user,
     });
+
+    return user;
   }
 }

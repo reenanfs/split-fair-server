@@ -17,8 +17,8 @@ export const createUser = async (
     await UserService.createUser(userId, email);
 
     return event;
-  } catch (error) {
-    console.log(error);
+  } catch (error: unknown) {
+    console.error(error);
     throw new Error('User replication on ddb failed');
   }
 };

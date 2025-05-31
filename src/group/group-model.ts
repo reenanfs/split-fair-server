@@ -1,3 +1,9 @@
+import { Balance } from 'src/balance/balance-model';
+import { ExpenseSplit } from 'src/expense-split/expense-split-model';
+import { Expense } from 'src/expense/expense-model';
+import { Payment } from 'src/payment/payment-model';
+import { User } from 'src/user/user-model';
+
 export interface Group {
   pk: string;
   sk: string;
@@ -8,4 +14,12 @@ export interface Group {
   created_by: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface GroupDetails {
+  group: Group;
+  members: User[];
+  balances: Balance[];
+  payments: Payment[];
+  expenses: (Expense & { splits: ExpenseSplit[] })[];
 }

@@ -4,8 +4,10 @@ import { z } from 'zod';
 
 import { ResponseManager } from '@utils/response-manager';
 import { BalanceService } from '../balance-service';
+import { Balance } from '../balance-model';
+import { handleApiError } from 'src/shared/errors/handle-api-error';
 
-const createPaymentSchema = z.object({
+const createBalanceSchema = z.object({
   groupId: z.string().min(1),
   currency: z.string().min(1),
 });
@@ -17,27 +19,33 @@ export const createPayment = async (
     const userId = event.requestContext.authorizer?.jwt?.claims?.sub;
 
     if (!userId) {
-      return ResponseManager.sendUnauthorizedRequest('User not authorized');
+      return ResponseManager.sendUnauthorizedRequest();
     }
 
-    const body = JSON.parse(event.body || '{}');
+    const parsed = createBalanceSchema.safeParse(
+      JSON.parse(event.body || '{}'),
+    );
 
-    const valdiation = createPaymentSchema.safeParse(body);
-
-    if (!valdiation.success) {
+    if (!parsed.success) {
       return ResponseManager.sendBadRequest(
         'Validation error',
-        valdiation.error.flatten(),
+        parsed.error.flatten(),
       );
     }
 
-    const { groupId, currency } = body;
+    const { groupId, currency } = parsed.data;
 
-    await BalanceService.createBalance(groupId, userId, currency);
+    const balance = await BalanceService.createBalance(
+      groupId,
+      userId,
+      currency,
+    );
 
-    return ResponseManager.sendSuccess('Balance created successfully');
-  } catch (error) {
-    console.log(error);
-    return ResponseManager.sendInternalServerError();
+    return ResponseManager.sendSuccess<Balance>(
+      'Balance created successfully',
+      balance,
+    );
+  } catch (error: unknown) {
+    return handleApiError(error);
   }
 };

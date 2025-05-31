@@ -1,4 +1,4 @@
-import { PutCommandOutput } from '@aws-sdk/lib-dynamodb';
+import { v4 as uuidv4 } from 'uuid';
 
 import { dynamoDb } from '@database';
 import { Payment } from './payment-model';
@@ -8,18 +8,18 @@ const TABLE_NAME = requireEnv('TABLE_NAME');
 
 export class PaymentService {
   static async createPayment(
-    paymentId: string,
     groupId: string,
     fromUserId: string,
     toUserId: string,
     amount: number,
     currency: string,
-  ): Promise<PutCommandOutput> {
+  ): Promise<Payment> {
+    const paymentId = uuidv4();
     const timestamp = new Date().toISOString();
 
     const payment: Payment = {
       pk: `GROUP#${groupId}`,
-      sk: `PAYMENT#${paymentId}`,
+      sk: `PAYMENT#${timestamp}#${paymentId}`,
       entity: 'payment',
       payment_id: paymentId,
       group_id: groupId,
@@ -31,9 +31,11 @@ export class PaymentService {
       updated_at: timestamp,
     };
 
-    return dynamoDb.put({
+    await dynamoDb.put({
       TableName: TABLE_NAME,
       Item: payment,
     });
+
+    return payment;
   }
 }
