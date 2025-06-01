@@ -69,6 +69,15 @@ functions:
           authorizer:
             name: httpApiCognitoAuthorizer
 
+  retrieveGroupDetails:
+    handler: src/group/handlers/retrieve-group-details.retrieveGroupDetails
+    events:
+      - httpApi:
+          method: GET
+          path: /api/v1/groups/{id}/details
+          authorizer:
+            name: httpApiCognitoAuthorizer
+
   # GroupMembership entity functions
   createGroupMembership:
     handler: src/group-membership/handlers/create-group-membership.createGroupMembership

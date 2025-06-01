@@ -1,32 +1,21 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { z } from 'zod';
-
 import { ResponseManager } from '@utils/response-manager';
 import { GroupService } from '../group-service';
 import { GroupDetails } from '../group-model';
 import { handleApiError } from 'src/shared/errors/handle-api-error';
 
-const retrieveGroupDetailsSchema = z.object({
-  groupId: z.string().min(1),
-});
-
 export const retrieveGroupDetails = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   try {
-    const parsed = retrieveGroupDetailsSchema.safeParse(
-      JSON.parse(event.body || '{}'),
-    );
+    const groupId = event.pathParameters?.id;
 
-    if (!parsed.success) {
-      return ResponseManager.sendBadRequest(
-        'Validation error',
-        parsed.error.flatten(),
-      );
+    if (!groupId) {
+      return ResponseManager.sendBadRequest('Validation error', [
+        'Group id is requires',
+      ]);
     }
-
-    const { groupId } = parsed.data;
 
     const groupDetails = await GroupService.getGroupDetails(groupId);
 

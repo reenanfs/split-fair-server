@@ -5,7 +5,7 @@ export interface Balance {
   group_id: string;
   user_id: string;
   currency: string;
-  balance_map: { [key: string]: number };
+  balance_map: Record<string, number>;
   created_at: string;
   updated_at: string;
 }
