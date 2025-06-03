@@ -1,6 +1,5 @@
 import { Balance } from 'src/balance/balance-model';
-import { ExpenseSplit } from 'src/expense-split/expense-split-model';
-import { Expense } from 'src/expense/expense-model';
+import { ExpenseWithSplit } from 'src/expense/expense-model';
 import { Payment } from 'src/payment/payment-model';
 import { User } from 'src/user/user-model';
 
@@ -21,5 +20,5 @@ export interface GroupDetails {
   members: User[];
   balances: Balance[];
   payments: Payment[];
-  expenses: (Expense & { splits: ExpenseSplit[] })[];
+  expenses: ExpenseWithSplit[];
 }
